@@ -1,31 +1,50 @@
 "use client";
 
-import type { CSSProperties } from "react";
 import { useEffect, useMemo, useState } from "react";
 
-const clamp = (value: number, min: number, max: number) =>
-  Math.min(Math.max(value, min), max);
+const RSVP_DEFAULTS = {
+  date: "Saturday, June 15, 2024",
+  location: "The Grand Ballroom • Pasadena, CA"
+};
 
-const VIDEO_URL =
-  "https://storage.googleapis.com/coverr-main/mp4/Mt_Baker.mp4";
+const SCHEDULE = [
+  {
+    title: "Welcome Dinner",
+    time: "Friday, June 14 · 7:00 PM",
+    description: "Join us for an intimate dinner to kick off the celebration."
+  },
+  {
+    title: "Wedding Ceremony",
+    time: "Saturday, June 15 · 4:00 PM",
+    description: "A heartfelt ceremony followed by cocktails and sunset photos."
+  },
+  {
+    title: "Reception",
+    time: "Saturday, June 15 · 6:00 PM",
+    description: "Dinner, dancing, and a night full of surprises."
+  }
+];
+
+const DETAILS = [
+  {
+    title: "Venue",
+    detail: "The Grand Ballroom",
+    subtext: "123 Celebration Ave, Pasadena, CA"
+  },
+  {
+    title: "Attire",
+    detail: "Black Tie Garden",
+    subtext: "Think elegant with a touch of floral."
+  },
+  {
+    title: "Stay",
+    detail: "Rosewood Hotel",
+    subtext: "Room block available until May 1."
+  }
+];
 
 export default function Home() {
-  const [scrollProgress, setScrollProgress] = useState(0);
   const [guestName, setGuestName] = useState("");
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollTop = window.scrollY;
-      const viewport = window.innerHeight;
-      const progress = clamp(scrollTop / (viewport * 0.9), 0, 1);
-      setScrollProgress(progress);
-    };
-
-    handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -37,64 +56,125 @@ export default function Home() {
       document.title = `Rafayel & Anushik | ${decoded}`;
       return;
     }
-    document.title = "Rafayel & Anushik | RSVP";
+    document.title = "Rafayel & Anushik | Wedding";
   }, []);
 
-  const flapStyle = useMemo(
-    () => ({
-      transform: `rotateX(${clamp(scrollProgress * 160, 0, 160)}deg)`
-    }),
-    [scrollProgress]
-  );
-
-  const letterShift = useMemo(
-    () => ({
-      "--letter-shift": `${-clamp(scrollProgress * 80, 0, 80)}px`
-    }) as CSSProperties,
-    [scrollProgress]
+  const greeting = useMemo(
+    () => (guestName ? `Dear ${guestName},` : "Dear loved ones,"),
+    [guestName]
   );
 
   return (
-    <main>
-      <div className="video-background">
+    <main className="site">
+      <div className="video-background" aria-hidden="true">
         <video autoPlay muted loop playsInline>
-          <source src={VIDEO_URL} type="video/mp4" />
+          <source
+            src="https://storage.googleapis.com/coverr-main/mp4/Mt_Baker.mp4"
+            type="video/mp4"
+          />
         </video>
       </div>
 
-      <section className="hero">
-        <div className="envelope-stage">
-          <div className="envelope" style={letterShift}>
-            <div className="envelope-body" />
-            <div className="envelope-letter" />
-            <div className="envelope-flap" style={flapStyle} />
-            <div className="envelope-detail" />
+      <header className="hero" id="top">
+        <div className="hero-content">
+          <p className="hero-eyebrow">You are invited to celebrate</p>
+          <h1 className="hero-title">
+            <span className="script-stroke" aria-hidden="true">
+              Rafayel &amp; Anushik
+            </span>
+            <span className="script-fill">Rafayel &amp; Anushik</span>
+          </h1>
+          <p className="hero-subtitle">{RSVP_DEFAULTS.date}</p>
+          <p className="hero-location">{RSVP_DEFAULTS.location}</p>
+          <div className="hero-actions">
+            <a className="btn btn-primary" href="#rsvp">
+              RSVP
+            </a>
+            <a className="btn btn-outline" href="#details">
+              View Details
+            </a>
           </div>
         </div>
-        <div className="scroll-hint">
-          Scroll down
-          <span />
+        <div className="hero-panel">
+          <div className="hero-panel-inner">
+            <span className="hero-panel-title">The Wedding Day</span>
+            <h2>June 15, 2024</h2>
+            <p>
+              An evening of vows, joyful tears, and dancing under the stars.
+            </p>
+            <div className="hero-panel-tags">
+              <span>Garden Ceremony</span>
+              <span>Golden Hour</span>
+              <span>Live Band</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section className="invitation" aria-label="Invitation message">
+        <div className="invitation-card">
+          <p className="invitation-greeting">{greeting}</p>
+          <p>
+            With hearts full of love and gratitude, we invite you to celebrate
+            our wedding. Your presence is the greatest gift, and we cannot wait
+            to share this unforgettable weekend with you.
+          </p>
+          <p className="invitation-signature">With love, Rafayel &amp; Anushik</p>
         </div>
       </section>
 
-      <section className="names">
-        <svg viewBox="0 0 900 180" role="img" aria-label="Rafayel and Anushik">
-          <text x="50%" y="120" textAnchor="middle" className="script-text">
-            Rafayel &amp; Anushik
-          </text>
-        </svg>
+      <section className="details" id="details">
+        <div className="section-heading">
+          <p>Weekend Essentials</p>
+          <h2>The Details</h2>
+        </div>
+        <div className="details-grid">
+          {DETAILS.map((detail) => (
+            <article className="detail-card" key={detail.title}>
+              <h3>{detail.title}</h3>
+              <p className="detail-main">{detail.detail}</p>
+              <p className="detail-sub">{detail.subtext}</p>
+            </article>
+          ))}
+        </div>
       </section>
 
-      <section className="invite-section">
-        <div className="invite-card">
-          <h2>Kindly RSVP</h2>
-          <p>
-            {guestName
-              ? `Dear ${guestName}, we cannot wait to celebrate with you.`
-              : "We cannot wait to celebrate with you."}
-          </p>
-          <form>
-            <div className="form-field">
+      <section className="schedule" id="schedule">
+        <div className="section-heading">
+          <p>Plan your stay</p>
+          <h2>Weekend Schedule</h2>
+        </div>
+        <div className="schedule-list">
+          {SCHEDULE.map((item) => (
+            <article className="schedule-card" key={item.title}>
+              <h3>{item.title}</h3>
+              <p className="schedule-time">{item.time}</p>
+              <p>{item.description}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="gallery" aria-label="Gallery">
+        <div className="section-heading">
+          <p>Moments to remember</p>
+          <h2>Our Journey</h2>
+        </div>
+        <div className="gallery-grid">
+          <div className="gallery-card gallery-one" />
+          <div className="gallery-card gallery-two" />
+          <div className="gallery-card gallery-three" />
+        </div>
+      </section>
+
+      <section className="rsvp" id="rsvp">
+        <div className="section-heading">
+          <p>Kindly respond by May 1</p>
+          <h2>RSVP</h2>
+        </div>
+        <div className="rsvp-content">
+          <form className="rsvp-form">
+            <div className="form-row">
               <label htmlFor="fullName">Full name</label>
               <input
                 id="fullName"
@@ -104,29 +184,51 @@ export default function Home() {
                 required
               />
             </div>
-            <div className="form-field">
+            <div className="form-row">
               <label htmlFor="attendance">Will you attend?</label>
               <select id="attendance" name="attendance" required>
                 <option value="">Select one</option>
-                <option value="yes">Yes, I will be there</option>
+                <option value="yes">Yes, with joy</option>
                 <option value="no">Regretfully, no</option>
               </select>
             </div>
-            <div className="form-field">
+            <div className="form-row">
               <label htmlFor="guests">Additional guests</label>
               <select id="guests" name="guests" required>
                 <option value="0">Just me</option>
                 <option value="+1">+1</option>
                 <option value="+2">+2</option>
-                <option value="+3">+3</option>
               </select>
             </div>
-            <button className="submit-btn" type="submit">
+            <div className="form-row">
+              <label htmlFor="notes">Notes for the couple</label>
+              <textarea
+                id="notes"
+                name="notes"
+                placeholder="Dietary restrictions, song requests, or warm wishes"
+                rows={4}
+              />
+            </div>
+            <button className="btn btn-primary" type="submit">
               Send RSVP
             </button>
           </form>
+          <div className="rsvp-card">
+            <h3>Event Address</h3>
+            <p>123 Celebration Ave</p>
+            <p>Pasadena, CA 91101</p>
+            <div className="rsvp-divider" />
+            <h3>Contact</h3>
+            <p>rsvp@rafayel-anushik.com</p>
+            <p>(555) 123-4567</p>
+          </div>
         </div>
       </section>
+
+      <footer className="footer">
+        <p>Thank you for being part of our story.</p>
+        <a href="#top">Back to top</a>
+      </footer>
     </main>
   );
 }
